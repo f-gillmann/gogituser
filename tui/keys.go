@@ -1,94 +1,91 @@
 package tui
 
 import (
-	"bufio"
-	"bytes"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"gogituser/config"
 )
 
 // SelectOption is a label/value pair for a select field.
 type SelectOption struct {
 	Label string // displayed in the list
 	Value string // stored when selected
+	Note  string // shown faint after the label
+	key   *gpgKey
 }
 
-// GPGKeyOptions returns the fingerprints of all secret keys in the keyring.
-func GPGKeyOptions() []SelectOption {
-	out, err := exec.Command("gpg", "--list-secret-keys", "--with-colons").Output()
-	if err != nil || len(out) == 0 {
+// SSHKeyOptions returns the private keys in ~/.ssh/ and its direct subfolders that
+// have a matching .pub file. Only file names are checked, key contents are never read.
+func SSHKeyOptions() []SelectOption {
+	sshDir := config.ExpandHome(sshDirPrefix)
+	entries, err := os.ReadDir(sshDir)
+	if err != nil {
 		return nil
 	}
 
-	type gpgKey struct{ fpr, uid string }
-	var keys []gpgKey
-	var cur *gpgKey
-
-	scanner := bufio.NewScanner(bytes.NewReader(out))
-	for scanner.Scan() {
-		f := strings.Split(scanner.Text(), ":")
-		if len(f) < 2 {
-			continue
+	opts := keyPairsIn(sshDir, "")
+	for _, e := range entries {
+		if e.IsDir() {
+			opts = append(opts, keyPairsIn(filepath.Join(sshDir, e.Name()), e.Name()+"/")...)
 		}
-		switch f[0] {
-		case "sec":
-			keys = append(keys, gpgKey{})
-			cur = &keys[len(keys)-1]
-		case "fpr":
-			if cur != nil && cur.fpr == "" && len(f) >= 10 {
-				cur.fpr = f[9]
-			}
-		case "uid":
-			if cur != nil && cur.uid == "" && len(f) >= 10 && f[1] != "r" {
-				cur.uid = f[9]
-			}
-		}
-	}
-
-	opts := make([]SelectOption, 0, len(keys))
-	for _, k := range keys {
-		if k.fpr == "" {
-			continue
-		}
-		label := k.fpr
-		if len(k.fpr) > 8 {
-			label = k.fpr[:8] + "..."
-		}
-		if k.uid != "" {
-			label += "  " + k.uid
-		}
-		opts = append(opts, SelectOption{Label: label, Value: k.fpr})
 	}
 	return opts
 }
 
-// SSHKeyOptions returns paths to private key files found in ~/.ssh/.
-func SSHKeyOptions() []SelectOption {
-	home, err := os.UserHomeDir()
+// keyPairsIn lists key pairs in dir. subPath is dir relative to ~/.ssh/, like "work/".
+func keyPairsIn(dir, subPath string) []SelectOption {
+	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil
-	}
-	entries, err := os.ReadDir(filepath.Join(home, ".ssh"))
-	if err != nil {
-		return nil
-	}
-
-	skip := map[string]bool{
-		"known_hosts": true, "known_hosts.old": true,
-		"config": true, "authorized_keys": true, "environment": true,
 	}
 
 	var opts []SelectOption
 	for _, e := range entries {
-		if e.IsDir() || strings.HasSuffix(e.Name(), ".pub") || skip[e.Name()] {
+		name, isPub := strings.CutSuffix(e.Name(), ".pub")
+		if e.IsDir() || !isPub {
+			continue
+		}
+		if _, err := os.Stat(filepath.Join(dir, name)); err != nil {
 			continue
 		}
 		opts = append(opts, SelectOption{
-			Label: e.Name(),
-			Value: "~/.ssh/" + e.Name(),
+			Label: subPath + name,
+			Value: sshDirPrefix + subPath + name,
 		})
 	}
 	return opts
+}
+
+const sshDirPrefix = "~/.ssh/"
+
+// completeKeyPath suggests entries of the folder being typed in, keeping the path as typed.
+func completeKeyPath(typed string) []string {
+	slash := strings.LastIndex(typed, "/")
+	if slash < 0 {
+		return nil
+	}
+	dirPart, base := typed[:slash+1], typed[slash+1:]
+
+	entries, err := os.ReadDir(config.ExpandHome(dirPart))
+	if err != nil {
+		return nil
+	}
+
+	var suggestions []string
+	for _, e := range entries {
+		name := e.Name()
+		if !strings.HasPrefix(name, base) || strings.HasSuffix(name, ".pub") {
+			continue
+		}
+		if strings.HasPrefix(name, ".") && !strings.HasPrefix(base, ".") {
+			continue
+		}
+		if e.IsDir() {
+			name += "/"
+		}
+		suggestions = append(suggestions, dirPart+name)
+	}
+	return suggestions
 }

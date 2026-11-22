@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"gogituser/config"
+	"gogituser/tui"
 )
 
 var listCmd = &cobra.Command{
@@ -18,13 +19,10 @@ var listCmd = &cobra.Command{
 			return err
 		}
 		if len(cfg.Profiles) == 0 {
-			fmt.Println("No profiles found. Run 'gogituser add' to create one.")
+			fmt.Println("No profiles found. Run 'ggu add' to create one.")
 			return nil
 		}
-		for _, p := range cfg.Profiles {
-			fmt.Printf("%s\n  name:        %s\n  email:       %s\n  signing key: %s\n  ssh key:     %s\n\n",
-				p.Name, p.GitName, p.Email, p.SigningKey, p.SSHKey)
-		}
+		fmt.Println(tui.ProfileList(cfg.Profiles, activeProfile()))
 		return nil
 	},
 }

@@ -1,66 +1,91 @@
 # gogituser
 
-Switch git identities per repo. Profiles are stored in `~/.gituser.toml` and applied via `git config` using your configured commit name, email, GPG signing key, and SSH key.
+`ggu` switches git identities per repo. A profile holds your commit name, email, and optionally a GPG signing key and an SSH key. `ggu use` writes them into the repo's git config, so plain `git` uses the right identity from then on.
 
-## Install
+## Build
 
 ```sh
-just install
+just build          # binary in bin/ggu
+just completions    # bash, zsh and fish completions in bin/completions/
 ```
+
+Run `just` to see all recipes.
 
 ## Usage
 
 ```sh
-gogituser add                           # create a profile
-gogituser use <profile>                 # apply to current repo
-gogituser list                          # list all profiles
-gogituser update <profile>              # edit a profile
-gogituser delete <profile>              # remove a profile
-gogituser clone <profile> <repo>        # clone using profile's SSH key
-gogituser remote set-url <profile>      # rewrite existing remote URL to use SSH host alias
-gogituser remote add <profile> <url>    # add a new remote with SSH host alias applied
+ggu add [profile]             # create a profile
+ggu use [profile]             # apply a profile to the current repo, opens a picker without a name
+ggu list                      # list all profiles, marks the one active in this repo
+ggu update <profile>          # change a profile
+ggu remove <profile>          # remove a profile
+ggu git <profile> <args...>   # run any git command as a profile
 ```
 
-`use`, `remote set-url`, and `remote add` must be run inside a git repository.
+`add` and `update` open a form, and `use` without a name opens a picker.
+
+## Without a terminal
+
+Every command also works in scripts, CI or dotfile setups. Pass the values as flags and no form opens:
+
+```sh
+ggu add work --git-name "Your Name" --git-email you@work.com \
+             --signing-key 1989EF9FE4BBD03D --ssh-key ~/.ssh/id_work
+ggu update work --git-email new@work.com     # changes only this field
+ggu update work --signing-key ""             # clears an optional field
+ggu use work
+ggu remove work --yes
+```
+
+Without a terminal, ggu never opens a form. It tells you which flags are missing instead.
+
+## What `use` sets
+
+| Profile field | git config |
+|---|---|
+| Git Name | `user.name` |
+| Git Email | `user.email` |
+| Signing Key | `user.signingkey`, plus `commit.gpgsign` and `tag.gpgsign` |
+| SSH Key | `core.sshCommand = ssh -i <key> -o IdentitiesOnly=yes` |
+
+Empty fields are removed from the repo config, so nothing from a previous profile stays active. ggu also writes `ggu.profile` so `list` knows which profile is active.
+
+## Running git as a profile
+
+`ggu git <profile>` runs git with the profile's identity. Anything after the profile name goes straight to git:
+
+```sh
+ggu git personal clone git@github.com:me/repo.git
+ggu git personal push
+ggu git work fetch upstream
+```
+
+After `clone`, the profile is applied to the new repo, so you can keep using plain `git` there.
 
 ## Config
 
-Profiles are stored in `~/.gituser.toml`:
+Profiles are stored in `~/.config/ggu/config.toml` (or `$XDG_CONFIG_HOME/ggu/config.toml`):
 
 ```toml
 [[profile]]
 name        = "personal"
 git_name    = "Your Name"
-email       = "you@example.com"
-signing_key = "ABCD1234"
-ssh_key     = "~/.ssh/id_personal"
-ssh_host    = "github-personal"     # optional, see below
+git_email   = "you@example.com"
+signing_key = "1989EF9FE4BBD03D"       # optional, turns on commit and tag signing
+ssh_key     = "~/.ssh/id_personal"     # optional, without it ssh and your agent pick the key
 ```
+
+SSH key paths must be full paths (`/...` or `~/...`). Paths in your home folder are saved with `~/`, so the config works on other machines too.
+
+## Signing and GitHub
+
+GitHub only marks a signed commit as verified when the commit email is also on the GPG key. `ggu list` warns when they differ, and the form marks keys with another email.
 
 ## Multiple accounts on the same host
 
-To use two accounts on the same host (e.g. two GitHub accounts), set up SSH host aliases in `~/.ssh/config`:
-
-```
-Host github-personal
-    HostName        github.com
-    User            git
-    IdentityFile    ~/.ssh/id_personal
-    AddKeysToAgent  yes
-
-Host github-work
-    HostName        github.com
-    User            git
-    IdentityFile    ~/.ssh/id_work
-    AddKeysToAgent  yes
-```
-
-Then set `ssh_host` on the profile to the alias name and use `remote set-url` in existing repos or `remote add` for new ones:
+Give each account its own SSH key and set `ssh_key` on its profile. ggu then tells ssh to use only that key, so GitHub knows which account you are. Remote URLs stay as they are, like `git@github.com:me/repo.git`.
 
 ```sh
-gogituser remote set-url personal           # rewrites origin: git@github.com:... -> git@github-personal:...
-gogituser remote set-url personal upstream  # target a different remote
-gogituser remote add personal <url>         # add a new remote to your local repo
+ggu git work clone git@github.com:company/repo.git   # clones with the work key
+ggu use personal                                      # this repo now pushes with the personal key
 ```
-
-`remote set-url` and `remote add` warn if the alias is missing from `~/.ssh/config` or if the file doesn't exist yet.

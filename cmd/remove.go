@@ -1,0 +1,55 @@
+package cmd
+
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+
+	"gogituser/config"
+	"gogituser/tui"
+)
+
+var removeYes bool
+
+var removeCmd = &cobra.Command{
+	Use:               "remove <profile>",
+	Short:             "Remove a profile",
+	Args:              cobra.ExactArgs(1),
+	ValidArgsFunction: completeProfiles,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cfg, err := config.Load()
+		if err != nil {
+			return err
+		}
+
+		name := args[0]
+		if cfg.Find(name) == nil {
+			return fmt.Errorf("unknown profile %q", name)
+		}
+
+		if !removeYes {
+			if !interactive() {
+				return fmt.Errorf("no terminal to confirm, pass --yes")
+			}
+			ok, err := tui.Confirm(fmt.Sprintf("Remove profile %q?", name))
+			if err != nil {
+				return err
+			}
+			if !ok {
+				fmt.Println("Cancelled.")
+				return nil
+			}
+		}
+
+		cfg.Remove(name)
+		if err := config.Save(cfg); err != nil {
+			return err
+		}
+		fmt.Printf("Profile %q removed.\n", name)
+		return nil
+	},
+}
+
+func init() {
+	removeCmd.Flags().BoolVarP(&removeYes, "yes", "y", false, "remove without asking")
+}

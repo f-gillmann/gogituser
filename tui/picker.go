@@ -18,29 +18,22 @@ func (i profileItem) FilterValue() string { return i.p.Name }
 type compactDelegate struct{}
 
 func (d compactDelegate) Height() int                             { return 1 }
-func (d compactDelegate) Spacing() int                           { return 0 }
+func (d compactDelegate) Spacing() int                            { return 0 }
 func (d compactDelegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd { return nil }
-
-var (
-	pickerSelected = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("212"))
-	pickerNormal   = lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
-	pickerDim      = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-)
 
 func (d compactDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
 	item := listItem.(profileItem).p
 	cursor := "  "
-	nameStyle := pickerNormal
-	detailStyle := pickerDim
+	nameStyle := normalStyle
 	if index == m.Index() {
-		cursor = "> "
-		nameStyle = pickerSelected
+		cursor = accentStyle.Render("▶ ")
+		nameStyle = accentStyle
 	}
 	_, _ = fmt.Fprintf(w, "%s%s  %s <%s>",
 		cursor,
 		nameStyle.Render(item.Name),
-		detailStyle.Render(item.GitName),
-		detailStyle.Render(item.Email),
+		dimStyle.Render(item.GitName),
+		dimStyle.Render(item.GitEmail),
 	)
 }
 
