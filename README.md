@@ -14,7 +14,6 @@ The package is called `gogituser`, the command is `ggu`.
 
 ```sh
 just build          # binary in bin/ggu
-just completions    # bash, zsh and fish completions in bin/completions/
 ```
 
 Run `just` to see all recipes.

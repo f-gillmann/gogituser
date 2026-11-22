@@ -1,6 +1,5 @@
 bin := "bin/ggu"
 version := `git describe --tags --always --dirty 2>/dev/null || echo dev`
-completions_dir := "bin/completions"
 
 [private]
 default:
@@ -13,17 +12,9 @@ build:
     go build -trimpath -ldflags "-s -w -X github.com/f-gillmann/gogituser/cmd.version={{version}}" -o {{bin}} ./cmd/ggu
 
 [group('build')]
-[doc('Generate shell completions into bin/completions/')]
-completions: build
-    mkdir -p {{completions_dir}}
-    {{bin}} completion bash > {{completions_dir}}/ggu.bash
-    {{bin}} completion zsh  > {{completions_dir}}/_ggu
-    {{bin}} completion fish > {{completions_dir}}/ggu.fish
-
-[group('build')]
-[doc('Remove build output')]
+[doc('Remove build output, including goreleaser snapshots')]
 clean:
-    rm -rf bin
+    rm -rf bin dist completions
 
 [group('dev')]
 [doc('Run ggu with the given arguments')]
