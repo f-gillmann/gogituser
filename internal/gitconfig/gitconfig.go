@@ -122,3 +122,13 @@ func ActiveProfile(dir string) string {
 	}
 	return strings.TrimSpace(string(out))
 }
+
+// OriginUsesHTTPS reports whether pushes and pulls of origin bypass ssh, and with it the profile's SSH key.
+func OriginUsesHTTPS(dir string) bool {
+	out, err := in(dir)("remote", "get-url", "origin").Output()
+	if err != nil {
+		return false
+	}
+	url := strings.TrimSpace(string(out))
+	return strings.HasPrefix(url, "https://") || strings.HasPrefix(url, "http://")
+}

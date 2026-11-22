@@ -23,7 +23,11 @@ var listCmd = &cobra.Command{
 			fmt.Println("No profiles found. Run 'ggu add' to create one.")
 			return nil
 		}
-		fmt.Println(tui.ProfileList(cfg.Profiles, gitconfig.ActiveProfile("")))
+		active := gitconfig.ActiveProfile("")
+		fmt.Println(tui.ProfileList(cfg.Profiles, active))
+		if p := cfg.Find(active); p != nil {
+			printSSHKeyHint(*p)
+		}
 		return nil
 	},
 }

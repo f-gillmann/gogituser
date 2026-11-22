@@ -70,3 +70,8 @@ func signingValue(p config.Profile, key keys.GPGKey, found bool) string {
 func UsingProfile(name string) string {
 	return checkStyle.Render("✓") + " Using profile " + accentStyle.Render(name)
 }
+
+// Hint renders a short note about something that works differently than expected.
+func Hint(text string) string {
+	return hintStyle.Render(text)
+}

@@ -68,5 +68,14 @@ func applyProfile(p config.Profile) error {
 	}
 	fmt.Println(tui.UsingProfile(p.Name))
 	fmt.Println(tui.ProfileDetails(p))
+	printSSHKeyHint(p)
 	return nil
+}
+
+// printSSHKeyHint points out that an HTTPS origin never uses the profile's SSH key.
+func printSSHKeyHint(p config.Profile) {
+	if p.SSHKey != "" && gitconfig.OriginUsesHTTPS("") {
+		fmt.Println()
+		fmt.Println(tui.Hint("origin uses HTTPS, so the SSH key is not used"))
+	}
 }

@@ -11,6 +11,7 @@ import (
 const (
 	ansiRed     = lipgloss.Color("1")
 	ansiGreen   = lipgloss.Color("2")
+	ansiYellow  = lipgloss.Color("3")
 	ansiBlue    = lipgloss.Color("4")
 	ansiMagenta = lipgloss.Color("5")
 	ansiCyan    = lipgloss.Color("6")
@@ -21,6 +22,7 @@ var (
 	errorStyle    = lipgloss.NewStyle().Bold(true).Foreground(ansiRed)
 	checkStyle    = lipgloss.NewStyle().Foreground(ansiGreen)
 	warnStyle     = lipgloss.NewStyle().Foreground(ansiRed)
+	hintStyle     = lipgloss.NewStyle().Foreground(ansiYellow)
 	normalStyle   = lipgloss.NewStyle()
 	dimStyle      = lipgloss.NewStyle().Faint(true)
 	dropdownArrow = lipgloss.NewStyle().Foreground(ansiCyan)

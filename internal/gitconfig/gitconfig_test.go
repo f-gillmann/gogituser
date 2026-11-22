@@ -56,6 +56,24 @@ func TestApplyOutsideRepo(t *testing.T) {
 	}
 }
 
+func TestOriginUsesHTTPS(t *testing.T) {
+	gittest.Isolate(t)
+	repo := gittest.NewRepo(t)
+	if OriginUsesHTTPS(repo) {
+		t.Error("no origin should not count as HTTPS")
+	}
+
+	gittest.Run(t, repo, "git", "remote", "add", "origin", "https://github.com/me/repo")
+	if !OriginUsesHTTPS(repo) {
+		t.Error("https origin not detected")
+	}
+
+	gittest.Run(t, repo, "git", "remote", "set-url", "origin", "git@github.com:me/repo.git")
+	if OriginUsesHTTPS(repo) {
+		t.Error("ssh origin reported as HTTPS")
+	}
+}
+
 func TestShellQuote(t *testing.T) {
 	if got := shellQuote("/a b/it's"); got != `'/a b/it'\''s'` {
 		t.Errorf("shellQuote = %s", got)
