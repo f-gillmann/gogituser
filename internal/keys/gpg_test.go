@@ -76,3 +76,16 @@ func TestFindGPGKey(t *testing.T) {
 		}
 	}
 }
+
+func TestSplitUID(t *testing.T) {
+	tests := map[string][2]string{
+		"Me <me@example.test>":              {"Me", "me@example.test"},
+		"Me Work (laptop) <w@example.test>": {"Me Work", "w@example.test"},
+		"Only A Name":                       {"Only A Name", ""},
+	}
+	for uid, want := range tests {
+		if name, email := SplitUID(uid); name != want[0] || email != want[1] {
+			t.Errorf("SplitUID(%q) = %q, %q, want %q, %q", uid, name, email, want[0], want[1])
+		}
+	}
+}

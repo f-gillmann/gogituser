@@ -80,19 +80,24 @@ func (k GPGKey) UIDFor(email string) string {
 
 func (k GPGKey) uidWithEmail(email string) string {
 	for _, uid := range k.UIDs {
-		if strings.EqualFold(uidEmail(uid), strings.TrimSpace(email)) {
+		if _, uidEmail := SplitUID(uid); strings.EqualFold(uidEmail, strings.TrimSpace(email)) {
 			return uid
 		}
 	}
 	return ""
 }
 
-func uidEmail(uid string) string {
+// SplitUID splits a user ID like "Name (comment) <mail@example.com>" into name and email.
+func SplitUID(uid string) (name, email string) {
 	start, end := strings.LastIndex(uid, "<"), strings.LastIndex(uid, ">")
 	if start < 0 || end < start {
-		return ""
+		return strings.TrimSpace(uid), ""
 	}
-	return uid[start+1 : end]
+	name = strings.TrimSpace(uid[:start])
+	if comment := strings.Index(name, " ("); comment >= 0 {
+		name = name[:comment]
+	}
+	return name, uid[start+1 : end]
 }
 
 // FindGPG matches a signing key the way people write it: a fingerprint, a long or

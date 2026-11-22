@@ -27,6 +27,16 @@ func (f *profileFlags) register(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&f.gitEmail, flagGitEmail, "", "email on commits")
 	cmd.Flags().StringVar(&f.signingKey, flagSigningKey, "", "GPG key ID or fingerprint, empty to clear")
 	cmd.Flags().StringVar(&f.sshKey, flagSSHKey, "", "full path to the SSH key, empty to clear")
+
+	completions := map[string]cobra.CompletionFunc{
+		flagGitName:    completeGitNames,
+		flagGitEmail:   completeGitEmails,
+		flagSigningKey: completeSigningKeys,
+		flagSSHKey:     completeSSHKeys,
+	}
+	for flag, complete := range completions {
+		_ = cmd.RegisterFlagCompletionFunc(flag, complete)
+	}
 }
 
 // applyTo copies only the flags that were passed, so an empty --ssh-key clears a field

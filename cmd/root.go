@@ -11,9 +11,6 @@ var rootCmd = &cobra.Command{
 	Short:         "Manage and apply git identity profiles",
 	SilenceErrors: true,
 	SilenceUsage:  true,
-	CompletionOptions: cobra.CompletionOptions{
-		HiddenDefaultCmd: true,
-	},
 }
 
 // ExitCodeError carries a child process exit code that should be passed on without extra output.

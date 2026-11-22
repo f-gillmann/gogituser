@@ -24,6 +24,12 @@ ggu git <profile> <args...>   # run any git command as a profile
 
 `add` and `update` open a form, and `use` without a name opens a picker.
 
+## Shell completion
+
+ggu can complete commands, profile names, GPG key IDs, emails and SSH keys in your shell.
+
+If you installed ggu from a package, this already works. If not, run `ggu completion --help` to see how to set it up for your shell.
+
 ## Without a terminal
 
 Every command also works in scripts, CI or dotfile setups. Pass the values as flags and no form opens:
