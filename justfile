@@ -1,4 +1,5 @@
 bin := "bin/ggu"
+version := `git describe --tags --always --dirty 2>/dev/null || echo dev`
 completions_dir := "bin/completions"
 
 [private]
@@ -9,7 +10,7 @@ default:
 [doc('Build the ggu binary into bin/')]
 build:
     mkdir -p bin
-    go build -o {{bin}} .
+    go build -trimpath -ldflags "-s -w -X github.com/f-gillmann/gogituser/cmd.version={{version}}" -o {{bin}} .
 
 [group('build')]
 [doc('Generate shell completions into bin/completions/')]

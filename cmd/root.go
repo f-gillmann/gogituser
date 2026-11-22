@@ -2,13 +2,27 @@ package cmd
 
 import (
 	"fmt"
+	"runtime/debug"
 
 	"github.com/spf13/cobra"
 )
 
+// version is set at build time from the git tag, see the justfile and .goreleaser.yaml.
+var version = "dev"
+
+// moduleVersion covers "go install", which sets no version but records the module's tag in the binary.
+func moduleVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	if version == "dev" && ok && info.Main.Version != "" && info.Main.Version != "(devel)" {
+		return info.Main.Version
+	}
+	return version
+}
+
 var rootCmd = &cobra.Command{
 	Use:           "ggu",
 	Short:         "Manage and apply git identity profiles",
+	Version:       moduleVersion(),
 	SilenceErrors: true,
 	SilenceUsage:  true,
 }
