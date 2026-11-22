@@ -8,7 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"gogituser/internal/config"
+	"github.com/f-gillmann/gogituser/internal/config"
 )
 
 type profileItem struct{ p config.Profile }

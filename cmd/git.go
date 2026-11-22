@@ -10,9 +10,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gogituser/internal/config"
-	"gogituser/internal/gitconfig"
-	"gogituser/internal/tui"
+	"github.com/f-gillmann/gogituser/internal/config"
+	"github.com/f-gillmann/gogituser/internal/gitconfig"
+	"github.com/f-gillmann/gogituser/internal/tui"
 )
 
 var gitCmd = &cobra.Command{

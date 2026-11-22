@@ -4,7 +4,7 @@ import (
 	"slices"
 	"strings"
 
-	"gogituser/internal/config"
+	"github.com/f-gillmann/gogituser/internal/config"
 )
 
 // Overrides passes the profile to a single git run as "-c" options. Settings the profile

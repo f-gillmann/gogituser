@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gogituser/internal/config"
+	"github.com/f-gillmann/gogituser/internal/config"
 )
 
 func newFlagCommand(t *testing.T, args ...string) (*cobra.Command, *profileFlags) {

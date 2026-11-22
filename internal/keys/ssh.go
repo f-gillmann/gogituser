@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gogituser/internal/config"
+	"github.com/f-gillmann/gogituser/internal/config"
 )
 
 // SSHDir is where SSH keys are looked for, written the way profiles store paths.

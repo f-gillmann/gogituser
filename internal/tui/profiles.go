@@ -4,8 +4,8 @@ import (
 	"slices"
 	"strings"
 
-	"gogituser/internal/config"
-	"gogituser/internal/keys"
+	"github.com/f-gillmann/gogituser/internal/config"
+	"github.com/f-gillmann/gogituser/internal/keys"
 )
 
 var detailLabel = dimStyle.Width(9)

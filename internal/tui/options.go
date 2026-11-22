@@ -1,6 +1,6 @@
 package tui
 
-import "gogituser/internal/keys"
+import "github.com/f-gillmann/gogituser/internal/keys"
 
 // SelectOption is a label/value pair for a select field.
 type SelectOption struct {

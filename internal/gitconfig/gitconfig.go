@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"gogituser/internal/config"
+	"github.com/f-gillmann/gogituser/internal/config"
 )
 
 // ActiveProfileKey records in the repo's git config which profile was applied.

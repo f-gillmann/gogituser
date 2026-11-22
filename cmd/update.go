@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gogituser/internal/config"
-	"gogituser/internal/terminal"
-	"gogituser/internal/tui"
+	"github.com/f-gillmann/gogituser/internal/config"
+	"github.com/f-gillmann/gogituser/internal/terminal"
+	"github.com/f-gillmann/gogituser/internal/tui"
 )
 
 var updateFlags profileFlags

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"gogituser/cmd"
+	"github.com/f-gillmann/gogituser/cmd"
 )
 
 func main() {

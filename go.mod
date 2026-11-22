@@ -1,4 +1,4 @@
-module gogituser
+module github.com/f-gillmann/gogituser
 
 go 1.26
 

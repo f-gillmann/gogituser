@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"gogituser/internal/config"
-	"gogituser/internal/gitconfig"
-	"gogituser/internal/gittest"
+	"github.com/f-gillmann/gogituser/internal/config"
+	"github.com/f-gillmann/gogituser/internal/gitconfig"
+	"github.com/f-gillmann/gogituser/internal/gittest"
 )
 
 func TestRunGitAsClone(t *testing.T) {

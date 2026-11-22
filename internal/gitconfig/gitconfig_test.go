@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"gogituser/internal/config"
-	"gogituser/internal/gittest"
+	"github.com/f-gillmann/gogituser/internal/config"
+	"github.com/f-gillmann/gogituser/internal/gittest"
 )
 
 func TestApplySwitchesCleanly(t *testing.T) {

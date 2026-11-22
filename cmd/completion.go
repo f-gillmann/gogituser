@@ -6,8 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gogituser/internal/config"
-	"gogituser/internal/keys"
+	"github.com/f-gillmann/gogituser/internal/config"
+	"github.com/f-gillmann/gogituser/internal/keys"
 )
 
 func completeProfiles(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {

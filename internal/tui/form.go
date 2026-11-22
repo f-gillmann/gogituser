@@ -8,8 +8,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"gogituser/internal/config"
-	"gogituser/internal/keys"
+	"github.com/f-gillmann/gogituser/internal/config"
+	"github.com/f-gillmann/gogituser/internal/keys"
 )
 
 // navigation tells the form where focus should go after a field handled a key.
