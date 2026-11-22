@@ -239,7 +239,7 @@ func (f *selectField) sortMatchingFirst() {
 }
 
 func (f *selectField) matchRank(o SelectOption) int {
-	if o.key != nil && o.key.hasEmail(f.matchEmail) {
+	if o.key != nil && o.key.HasEmail(f.matchEmail) {
 		return 0
 	}
 	return 1
@@ -312,7 +312,7 @@ func (f *selectField) displayValue() string {
 
 func (f *selectField) noteFor(o SelectOption) string {
 	note := o.Note
-	if note == "" && o.key != nil && f.matchEmail != "" && !o.key.hasEmail(f.matchEmail) {
+	if note == "" && o.key != nil && f.matchEmail != "" && !o.key.HasEmail(f.matchEmail) {
 		note = "(other email)"
 	}
 	if note == "" {

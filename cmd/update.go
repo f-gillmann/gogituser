@@ -5,8 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gogituser/config"
-	"gogituser/tui"
+	"gogituser/internal/config"
+	"gogituser/internal/terminal"
+	"gogituser/internal/tui"
 )
 
 var updateFlags profileFlags
@@ -31,7 +32,7 @@ var updateCmd = &cobra.Command{
 
 		p := *existing
 		if !updateFlags.applyTo(cmd, &p) {
-			if !interactive() {
+			if !terminal.Interactive() {
 				return fmt.Errorf("no terminal for the form, pass the fields to change, like --%s", flagGitEmail)
 			}
 			var ok bool

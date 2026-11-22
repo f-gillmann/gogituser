@@ -4,40 +4,38 @@ import (
 	"slices"
 	"strings"
 
-	"gogituser/config"
+	"gogituser/internal/config"
+	"gogituser/internal/keys"
 )
-
-// keyIDLength is the long key ID that gpg and GitHub show, the tail of the fingerprint.
-const keyIDLength = 16
 
 var detailLabel = dimStyle.Width(9)
 
 // ProfileList renders all profiles and marks the one active in the current repo.
 func ProfileList(profiles []config.Profile, active string) string {
-	keys := listGPGKeys()
+	keyring := keys.ListGPG()
 	blocks := make([]string, len(profiles))
 	for i, p := range profiles {
 		title := accentStyle.Render(p.Name)
 		if p.Name == active {
 			title += "  " + checkStyle.Render("✓ active")
 		}
-		blocks[i] = title + "\n" + profileDetails(p, keys)
+		blocks[i] = title + "\n" + profileDetails(p, keyring)
 	}
 	return strings.Join(blocks, "\n\n")
 }
 
 // ProfileDetails renders the identity lines of a profile, indented under its name.
 func ProfileDetails(p config.Profile) string {
-	return profileDetails(p, listGPGKeys())
+	return profileDetails(p, keys.ListGPG())
 }
 
-func profileDetails(p config.Profile, keys []gpgKey) string {
+func profileDetails(p config.Profile, keyring []keys.GPGKey) string {
 	email := p.GitEmail
 	var signing string
 	if p.SigningKey != "" {
-		key, found := findGPGKey(keys, p.SigningKey)
+		key, found := keys.FindGPG(keyring, p.SigningKey)
 		signing = signingValue(p, key, found)
-		if found && !key.hasEmail(p.GitEmail) {
+		if found && !key.HasEmail(p.GitEmail) {
 			email += "  " + warnStyle.Render("differs from signing key")
 		}
 	}
@@ -58,12 +56,12 @@ func detailRow(label, value string) string {
 	return "  " + detailLabel.Render(label) + value
 }
 
-func signingValue(p config.Profile, key gpgKey, found bool) string {
+func signingValue(p config.Profile, key keys.GPGKey, found bool) string {
 	if !found {
-		return shortKeyID(p.SigningKey) + "  " + warnStyle.Render("not found in keyring")
+		return keys.ShortKeyID(p.SigningKey) + "  " + warnStyle.Render("not found in keyring")
 	}
-	value := key.keyID()
-	if uid := key.uidFor(p.GitEmail); uid != "" {
+	value := key.KeyID()
+	if uid := key.UIDFor(p.GitEmail); uid != "" {
 		value += "  " + dimStyle.Render(uid)
 	}
 	return value
@@ -71,11 +69,4 @@ func signingValue(p config.Profile, key gpgKey, found bool) string {
 
 func UsingProfile(name string) string {
 	return checkStyle.Render("✓") + " Using profile " + accentStyle.Render(name)
-}
-
-func shortKeyID(fingerprint string) string {
-	if len(fingerprint) <= keyIDLength {
-		return fingerprint
-	}
-	return fingerprint[len(fingerprint)-keyIDLength:]
 }

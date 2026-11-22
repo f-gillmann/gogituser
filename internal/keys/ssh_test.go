@@ -1,4 +1,4 @@
-package tui
+package keys
 
 import (
 	"os"
@@ -19,7 +19,7 @@ func touch(t *testing.T, paths ...string) {
 	}
 }
 
-func TestSSHKeyOptions(t *testing.T) {
+func TestSSHKeys(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	ssh := filepath.Join(home, ".ssh")
@@ -32,17 +32,16 @@ func TestSSHKeyOptions(t *testing.T) {
 		filepath.Join(ssh, "config"),
 	)
 
-	var values []string
-	for _, o := range SSHKeyOptions() {
-		values = append(values, o.Value)
+	want := []SSHKey{
+		{Name: "id_ed25519", Path: "~/.ssh/id_ed25519"},
+		{Name: "work/id_work", Path: "~/.ssh/work/id_work"},
 	}
-	want := []string{"~/.ssh/id_ed25519", "~/.ssh/work/id_work"}
-	if !slices.Equal(values, want) {
-		t.Errorf("SSHKeyOptions = %q, want %q", values, want)
+	if got := SSHKeys(); !slices.Equal(got, want) {
+		t.Errorf("SSHKeys = %+v, want %+v", got, want)
 	}
 }
 
-func TestCompleteKeyPath(t *testing.T) {
+func TestCompletePath(t *testing.T) {
 	dir := t.TempDir()
 	touch(t,
 		filepath.Join(dir, "id_a"), filepath.Join(dir, "id_a.pub"), filepath.Join(dir, "id_b"),
@@ -58,8 +57,8 @@ func TestCompleteKeyPath(t *testing.T) {
 		"no-slash":    nil,
 	}
 	for typed, want := range tests {
-		if got := completeKeyPath(typed); !slices.Equal(got, want) {
-			t.Errorf("completeKeyPath(%q) = %q, want %q", typed, got, want)
+		if got := CompletePath(typed); !slices.Equal(got, want) {
+			t.Errorf("CompletePath(%q) = %q, want %q", typed, got, want)
 		}
 	}
 }

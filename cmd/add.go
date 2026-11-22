@@ -6,8 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gogituser/config"
-	"gogituser/tui"
+	"gogituser/internal/config"
+	"gogituser/internal/terminal"
+	"gogituser/internal/tui"
 )
 
 var addFlags profileFlags
@@ -31,7 +32,7 @@ var addCmd = &cobra.Command{
 		addFlags.applyTo(cmd, &p)
 
 		if missing := missingFields(p); len(missing) > 0 {
-			if !interactive() {
+			if !terminal.Interactive() {
 				return fmt.Errorf("no terminal for the form, pass %s", strings.Join(missing, ", "))
 			}
 			var ok bool

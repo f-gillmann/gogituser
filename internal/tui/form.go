@@ -8,7 +8,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"gogituser/config"
+	"gogituser/internal/config"
+	"gogituser/internal/keys"
 )
 
 // navigation tells the form where focus should go after a field handled a key.
@@ -103,12 +104,12 @@ func newFormModel(initial config.Profile, nameFixed bool) formModel {
 	m.fields[fieldName] = newTextField("profile name", initial.Name)
 	m.fields[fieldGitName] = newTextField("your name", initial.GitName)
 	m.fields[fieldGitEmail] = newTextField("email address", initial.GitEmail)
-	m.fields[fieldSigningKey] = newSelectField(GPGKeyOptions(), ResolveSigningKey(initial.SigningKey), nil)
-	m.fields[fieldSSHKey] = newSelectField(SSHKeyOptions(), initial.SSHKey, &customEntry{
+	m.fields[fieldSigningKey] = newSelectField(gpgKeyOptions(), keys.ResolveSigningKey(initial.SigningKey), nil)
+	m.fields[fieldSSHKey] = newSelectField(sshKeyOptions(), initial.SSHKey, &customEntry{
 		label:       "Other path",
 		placeholder: "path to key file",
-		prefill:     sshDirPrefix,
-		complete:    completeKeyPath,
+		prefill:     keys.SSHDir,
+		complete:    keys.CompletePath,
 		validate:    config.CheckKeyPath,
 	})
 

@@ -2,14 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
-	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 
-	"gogituser/config"
-	"gogituser/tui"
+	"gogituser/internal/config"
+	"gogituser/internal/keys"
 )
 
 const (
@@ -73,7 +71,7 @@ func missingFields(p config.Profile) []string {
 // prepareProfile is the single place where form and flag input become what gets saved.
 func prepareProfile(p config.Profile) config.Profile {
 	p = p.Normalized()
-	p.SigningKey = tui.ResolveSigningKey(p.SigningKey)
+	p.SigningKey = keys.ResolveSigningKey(p.SigningKey)
 	return p
 }
 
@@ -88,9 +86,4 @@ func checkProfile(p config.Profile) error {
 		return fmt.Errorf("--%s %s: %w", flagSSHKey, p.SSHKey, err)
 	}
 	return nil
-}
-
-// interactive reports whether the TUI can run, which needs a terminal on both ends.
-func interactive() bool {
-	return isatty.IsTerminal(os.Stdin.Fd()) && isatty.IsTerminal(os.Stdout.Fd())
 }

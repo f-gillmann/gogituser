@@ -5,8 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gogituser/config"
-	"gogituser/tui"
+	"gogituser/internal/config"
+	"gogituser/internal/terminal"
+	"gogituser/internal/tui"
 )
 
 var removeYes bool
@@ -28,7 +29,7 @@ var removeCmd = &cobra.Command{
 		}
 
 		if !removeYes {
-			if !interactive() {
+			if !terminal.Interactive() {
 				return fmt.Errorf("no terminal to confirm, pass --yes")
 			}
 			ok, err := tui.Confirm(fmt.Sprintf("Remove profile %q?", name))

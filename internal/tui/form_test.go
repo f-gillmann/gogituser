@@ -6,7 +6,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"gogituser/config"
+	"gogituser/internal/config"
+	"gogituser/internal/keys"
 )
 
 var (
@@ -102,19 +103,20 @@ func TestSelectFieldCustomInput(t *testing.T) {
 }
 
 func TestSelectFieldSortsMatchingEmailFirst(t *testing.T) {
-	keys := parseGPGKeys([]byte(gpgColons))
+	personal := keys.GPGKey{Fingerprint: "AAAA1111", UIDs: []string{"Me <personal@example.test>"}}
+	other := keys.GPGKey{Fingerprint: "BBBB2222", UIDs: []string{"Other <other@example.test>"}}
 	options := []SelectOption{
-		{Label: "personal", Value: keys[0].fingerprint, key: &keys[0]},
-		{Label: "other", Value: keys[1].fingerprint, key: &keys[1]},
+		{Label: "personal", Value: personal.Fingerprint, key: &personal},
+		{Label: "other", Value: other.Fingerprint, key: &other},
 	}
-	f := newSelectField(options, keys[0].fingerprint, nil)
+	f := newSelectField(options, personal.Fingerprint, nil)
 	f.matchEmail = "other@example.test"
 
 	pressAll(f, keyEnter)
 	if f.options[1].Label != "other" {
 		t.Errorf("matching key not first: %q", f.options[1].Label)
 	}
-	if f.value() != keys[0].fingerprint {
+	if f.value() != personal.Fingerprint {
 		t.Errorf("sorting changed the pick to %q", f.value())
 	}
 	if f.noteFor(f.options[2]) == "" || f.noteFor(f.options[1]) != "" {

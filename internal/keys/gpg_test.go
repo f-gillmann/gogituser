@@ -1,4 +1,4 @@
-package tui
+package keys
 
 import (
 	"slices"
@@ -20,45 +20,45 @@ uid:u::::1700000000::HASH4::Other <other@example.test>::::::::::0:
 `
 
 func TestParseGPGKeys(t *testing.T) {
-	keys := parseGPGKeys([]byte(gpgColons))
+	keys := parseGPG([]byte(gpgColons))
 	if len(keys) != 2 {
 		t.Fatalf("got %d keys", len(keys))
 	}
 
 	first := keys[0]
-	if first.fingerprint != "C7F0F53AFD7E1E1CFD4BDD7C8E7CA544EF5C944B" {
-		t.Errorf("fingerprint = %q", first.fingerprint)
+	if first.Fingerprint != "C7F0F53AFD7E1E1CFD4BDD7C8E7CA544EF5C944B" {
+		t.Errorf("fingerprint = %q", first.Fingerprint)
 	}
-	if !slices.Equal(first.subkeys, []string{"1111222233334444555566667777AAAABBBBCCCCDDDD"}) {
-		t.Errorf("subkeys = %q", first.subkeys)
+	if !slices.Equal(first.Subkeys, []string{"1111222233334444555566667777AAAABBBBCCCCDDDD"}) {
+		t.Errorf("subkeys = %q", first.Subkeys)
 	}
-	if len(first.uids) != 2 {
-		t.Errorf("revoked uid not skipped: %q", first.uids)
+	if len(first.UIDs) != 2 {
+		t.Errorf("revoked uid not skipped: %q", first.UIDs)
 	}
-	if first.keyID() != "8E7CA544EF5C944B" {
-		t.Errorf("keyID = %q", first.keyID())
+	if first.KeyID() != "8E7CA544EF5C944B" {
+		t.Errorf("keyID = %q", first.KeyID())
 	}
 }
 
 func TestGPGKeyEmails(t *testing.T) {
-	key := parseGPGKeys([]byte(gpgColons))[0]
+	key := parseGPG([]byte(gpgColons))[0]
 
-	if !key.hasEmail(" work@EXAMPLE.test ") {
+	if !key.HasEmail(" work@EXAMPLE.test ") {
 		t.Error("email match should ignore case and spaces")
 	}
-	if key.hasEmail("old@example.test") {
+	if key.HasEmail("old@example.test") {
 		t.Error("revoked uid must not count")
 	}
-	if got := key.uidFor("work@example.test"); got != "Me Work <WORK@example.test>" {
+	if got := key.UIDFor("work@example.test"); got != "Me Work <WORK@example.test>" {
 		t.Errorf("uidFor = %q", got)
 	}
-	if got := key.uidFor("nobody@example.test"); got != "Me Personal <personal@example.test>" {
+	if got := key.UIDFor("nobody@example.test"); got != "Me Personal <personal@example.test>" {
 		t.Errorf("uidFor fallback = %q", got)
 	}
 }
 
 func TestFindGPGKey(t *testing.T) {
-	keys := parseGPGKeys([]byte(gpgColons))
+	keys := parseGPG([]byte(gpgColons))
 	tests := map[string]string{
 		"C7F0F53AFD7E1E1CFD4BDD7C8E7CA544EF5C944B": "C7F0F53AFD7E1E1CFD4BDD7C8E7CA544EF5C944B",
 		"8E7CA544EF5C944B":                         "C7F0F53AFD7E1E1CFD4BDD7C8E7CA544EF5C944B",
@@ -70,9 +70,9 @@ func TestFindGPGKey(t *testing.T) {
 		"DEADBEEFDEADBEEF":                         "",
 	}
 	for id, want := range tests {
-		key, found := findGPGKey(keys, id)
-		if found != (want != "") || key.fingerprint != want {
-			t.Errorf("findGPGKey(%q) = %q, %v, want %q", id, key.fingerprint, found, want)
+		key, found := FindGPG(keys, id)
+		if found != (want != "") || key.Fingerprint != want {
+			t.Errorf("FindGPG(%q) = %q, %v, want %q", id, key.Fingerprint, found, want)
 		}
 	}
 }

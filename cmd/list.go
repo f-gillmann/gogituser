@@ -5,8 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"gogituser/config"
-	"gogituser/tui"
+	"gogituser/internal/config"
+	"gogituser/internal/gitconfig"
+	"gogituser/internal/tui"
 )
 
 var listCmd = &cobra.Command{
@@ -22,7 +23,7 @@ var listCmd = &cobra.Command{
 			fmt.Println("No profiles found. Run 'ggu add' to create one.")
 			return nil
 		}
-		fmt.Println(tui.ProfileList(cfg.Profiles, activeProfile()))
+		fmt.Println(tui.ProfileList(cfg.Profiles, gitconfig.ActiveProfile("")))
 		return nil
 	},
 }
