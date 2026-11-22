@@ -1,17 +1,46 @@
+bin := "bin/ggu"
+completions_dir := "bin/completions"
+
+[private]
+default:
+    @just --list
+
+[group('build')]
+[doc('Build the ggu binary into bin/')]
 build:
     mkdir -p bin
-    go build -o bin/gogituser .
+    go build -o {{bin}} .
 
-install: build
-    cp bin/gogituser ~/.local/bin/gogituser
+[group('build')]
+[doc('Generate shell completions into bin/completions/')]
+completions: build
+    mkdir -p {{completions_dir}}
+    {{bin}} completion bash > {{completions_dir}}/ggu.bash
+    {{bin}} completion zsh  > {{completions_dir}}/_ggu
+    {{bin}} completion fish > {{completions_dir}}/ggu.fish
 
-uninstall:
-    rm ~/.local/bin/gogituser                       || true
-    rm ~/.zsh/completions/_gogituser                || true
-    rm ~/.bash_completion.d/gogituser               || true
-    rm ~/.config/fish/completions/gogituser.fish    || true
+[group('build')]
+[doc('Remove build output')]
+clean:
+    rm -rf bin
 
-completions:
-    [ -d ~/.zsh/completions ]                  && gogituser completion zsh  > ~/.zsh/completions/_gogituser                || true
-    [ -d ~/.bash_completion.d ]                && gogituser completion bash > ~/.bash_completion.d/gogituser               || true
-    [ -d ~/.config/fish/completions ]          && gogituser completion fish > ~/.config/fish/completions/gogituser.fish    || true
+[group('dev')]
+[doc('Run ggu with the given arguments')]
+run *args:
+    go run . {{args}}
+
+[group('dev')]
+[doc('Format all Go files')]
+fmt:
+    gofmt -w .
+
+[group('dev')]
+[doc('Run go vet and check formatting')]
+lint:
+    go vet ./...
+    @unformatted="$(gofmt -l .)"; [ -z "$unformatted" ] || { printf "not formatted:\n%s\n" "$unformatted"; exit 1; }
+
+[group('dev')]
+[doc('Run all tests')]
+test:
+    go test ./...
