@@ -1,0 +1,68 @@
+version: 2
+
+project_name: gogituser
+
+before:
+  hooks:
+    - go mod tidy
+    - mkdir -p completions
+    - sh -c "go run ./cmd/ggu completion bash > completions/ggu.bash"
+    - sh -c "go run ./cmd/ggu completion zsh > completions/_ggu"
+    - sh -c "go run ./cmd/ggu completion fish > completions/ggu.fish"
+
+builds:
+  - main: ./cmd/ggu
+    binary: ggu
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w -X github.com/f-gillmann/gogituser/cmd.version={{ .Tag }}
+
+archives:
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+      - completions/*
+
+nfpms:
+  - package_name: gogituser
+    homepage: https://github.com/f-gillmann/gogituser
+    maintainer: Florian Gillmann <mail@florian-gillmann.com>
+    description: Switch git identities per repo
+    license: MIT
+    formats: [deb, rpm]
+    bindir: /usr/bin
+    dependencies:
+      - git
+    recommends:
+      - gnupg
+      - openssh-client
+    overrides:
+      rpm:
+        recommends:
+          - gnupg2
+          - openssh-clients
+    contents:
+      - src: completions/ggu.bash
+        dst: /usr/share/bash-completion/completions/ggu
+      - src: completions/_ggu
+        dst: /usr/share/zsh/site-functions/_ggu
+      - src: completions/ggu.fish
+        dst: /usr/share/fish/vendor_completions.d/ggu.fish
+      - src: LICENSE
+        dst: /usr/share/licenses/gogituser/LICENSE
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^chore:"

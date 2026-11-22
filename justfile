@@ -10,7 +10,7 @@ default:
 [doc('Build the ggu binary into bin/')]
 build:
     mkdir -p bin
-    go build -trimpath -ldflags "-s -w -X github.com/f-gillmann/gogituser/cmd.version={{version}}" -o {{bin}} .
+    go build -trimpath -ldflags "-s -w -X github.com/f-gillmann/gogituser/cmd.version={{version}}" -o {{bin}} ./cmd/ggu
 
 [group('build')]
 [doc('Generate shell completions into bin/completions/')]
@@ -28,7 +28,7 @@ clean:
 [group('dev')]
 [doc('Run ggu with the given arguments')]
 run *args:
-    go run . {{args}}
+    go run ./cmd/ggu {{args}}
 
 [group('dev')]
 [doc('Format all Go files')]

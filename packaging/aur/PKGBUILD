@@ -1,0 +1,50 @@
+# Maintainer: Florian Gillmann <mail at florian-gillmann dot com>
+pkgname=gogituser
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Switch git identities per repo'
+arch=('x86_64' 'aarch64')
+url='https://github.com/f-gillmann/gogituser'
+license=('MIT')
+depends=('git' 'glibc')
+optdepends=(
+  'gnupg: commit signing'
+  'openssh: SSH keys per profile'
+)
+makedepends=('go')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "$pkgname-$pkgver"
+  export GOFLAGS='-mod=readonly -modcacherw'
+  go mod download
+}
+
+build() {
+  cd "$pkgname-$pkgver"
+  export CGO_CPPFLAGS="$CPPFLAGS"
+  export CGO_CFLAGS="$CFLAGS"
+  export CGO_CXXFLAGS="$CXXFLAGS"
+  export CGO_LDFLAGS="$LDFLAGS"
+  export GOFLAGS='-buildmode=pie -trimpath -mod=readonly -modcacherw'
+  go build -ldflags "-linkmode=external -X github.com/f-gillmann/gogituser/cmd.version=v$pkgver" -o ggu ./cmd/ggu
+
+  ./ggu completion bash > ggu.bash
+  ./ggu completion zsh > _ggu
+  ./ggu completion fish > ggu.fish
+}
+
+check() {
+  cd "$pkgname-$pkgver"
+  go test ./...
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  install -Dm755 ggu "$pkgdir/usr/bin/ggu"
+  install -Dm644 ggu.bash "$pkgdir/usr/share/bash-completion/completions/ggu"
+  install -Dm644 _ggu "$pkgdir/usr/share/zsh/site-functions/_ggu"
+  install -Dm644 ggu.fish "$pkgdir/usr/share/fish/vendor_completions.d/ggu.fish"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

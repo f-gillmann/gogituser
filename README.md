@@ -2,6 +2,14 @@
 
 `ggu` switches git identities per repo. A profile holds your commit name, email, and optionally a GPG signing key and an SSH key. `ggu use` writes them into the repo's git config, so plain `git` uses the right identity from then on.
 
+## Install
+
+- Arch Linux: build the package from the PKGBUILD with `cd packaging/aur && makepkg -si`
+- Debian, Ubuntu and Fedora: download the `.deb` or `.rpm` from the [releases](https://github.com/f-gillmann/gogituser/releases)
+- With Go: `go install github.com/f-gillmann/gogituser/cmd/ggu@latest`
+
+The package is called `gogituser`, the command is `ggu`.
+
 ## Build
 
 ```sh
