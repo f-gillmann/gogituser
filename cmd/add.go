@@ -33,7 +33,8 @@ var addCmd = &cobra.Command{
 
 		if missing := missingFields(p); len(missing) > 0 {
 			if !terminal.Interactive() {
-				return fmt.Errorf("no terminal for the form, pass %s", strings.Join(missing, ", "))
+				return withHint(fmt.Errorf("can't show the form without a terminal, missing %s", strings.Join(missing, ", ")),
+					"run 'ggu add --help' to see all flags")
 			}
 			var ok bool
 			p, ok, err = tui.RunForm(p, false)

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -30,7 +31,8 @@ var removeCmd = &cobra.Command{
 
 		if !removeYes {
 			if !terminal.Interactive() {
-				return fmt.Errorf("no terminal to confirm, pass --yes")
+				return withHint(errors.New("can't ask for confirmation without a terminal"),
+					fmt.Sprintf("run 'ggu remove %s --yes' to remove it anyway", name))
 			}
 			ok, err := tui.Confirm(fmt.Sprintf("Remove profile %q?", name))
 			if err != nil {

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -33,7 +34,8 @@ var updateCmd = &cobra.Command{
 		p := *existing
 		if !updateFlags.applyTo(cmd, &p) {
 			if !terminal.Interactive() {
-				return fmt.Errorf("no terminal for the form, pass the fields to change, like --%s", flagGitEmail)
+				return withHint(errors.New("can't show the form without a terminal"),
+					fmt.Sprintf("run 'ggu update %s --%s ...', 'ggu update --help' shows all flags", p.Name, flagGitEmail))
 			}
 			var ok bool
 			p, ok, err = tui.RunForm(p, true)

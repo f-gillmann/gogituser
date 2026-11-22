@@ -23,6 +23,11 @@ func (e ExitCodeError) Error() string {
 	return fmt.Sprintf("exit status %d", int(e))
 }
 
+// withHint adds a line telling the user what to run next.
+func withHint(err error, hint string) error {
+	return fmt.Errorf("%w\n%s", err, hint)
+}
+
 func Execute() error {
 	return rootCmd.Execute()
 }

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -29,7 +30,8 @@ var useCmd = &cobra.Command{
 			return err
 		}
 		if !terminal.Interactive() {
-			return fmt.Errorf("no terminal for the picker, pass a profile name")
+			return withHint(errors.New("can't show the picker without a terminal"),
+				"run 'ggu use <profile>', 'ggu list' shows your profiles")
 		}
 		p, ok, err := pickProfile()
 		if err != nil || !ok {
