@@ -37,9 +37,15 @@ func (d compactDelegate) Render(w io.Writer, m list.Model, index int, listItem l
 	)
 }
 
+// pickerChromeLines is the room the list needs around the profiles for its title.
+const pickerChromeLines = 2
+
 type pickerModel struct {
 	list     list.Model
 	selected *config.Profile
+	// height is what the list needs for all profiles, so it never stretches to fill the terminal.
+	height int
+	done   bool
 }
 
 func (m pickerModel) Init() tea.Cmd { return nil }
@@ -53,19 +59,27 @@ func (m pickerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				p := item.p
 				m.selected = &p
 			}
+			m.done = true
 			return m, tea.Quit
 		case "q", "ctrl+c", "esc":
+			m.done = true
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
-		m.list.SetSize(msg.Width, msg.Height-2)
+		m.list.SetSize(msg.Width, min(m.height, msg.Height))
 	}
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
 }
 
-func (m pickerModel) View() string { return m.list.View() }
+// View is empty once the picker is done, so only the output after it stays on screen.
+func (m pickerModel) View() string {
+	if m.done {
+		return ""
+	}
+	return m.list.View()
+}
 
 // Pick shows an interactive profile picker. Returns the selected profile and
 // true if a selection was made.
@@ -75,14 +89,16 @@ func Pick(profiles []config.Profile) (config.Profile, bool, error) {
 		items[i] = profileItem{p}
 	}
 
-	l := list.New(items, compactDelegate{}, 60, len(profiles)+4)
+	height := len(profiles) + pickerChromeLines
+	l := list.New(items, compactDelegate{}, 60, height)
 	l.Title = "Select a profile  (Enter to apply, q to quit)"
 	l.Styles.Title = lipgloss.NewStyle().Bold(true).Padding(0, 1)
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.SetShowHelp(false)
+	l.SetShowPagination(false)
 
-	m, err := tea.NewProgram(pickerModel{list: l}).Run()
+	m, err := tea.NewProgram(pickerModel{list: l, height: height}).Run()
 	if err != nil {
 		return config.Profile{}, false, err
 	}
